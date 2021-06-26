@@ -15,7 +15,7 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: ["CMD", "curl", "-f", "localhost:8000/healthz"]
+      test: ["CMD", "curl", "-f", "localhost:8000/api/healthcheck"]
       interval: 2s
       timeout: 20s
       retries: 120
