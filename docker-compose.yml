@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  app:
+    stdin_open: true
+    tty: true
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    command: /start-reload.sh
+    volumes:
+      - ./app:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "localhost:8000/healthz"]
+      interval: 2s
+      timeout: 20s
+      retries: 120
+    restart: on-failure
