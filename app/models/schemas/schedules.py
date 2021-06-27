@@ -2,12 +2,11 @@ from typing import Dict, List
 
 from pydantic import BaseModel, validator
 
-
 from models.domain.schedules import (
+    MAX_SECONDS_VALUE,
+    MIN_SECONDS_VALUE,
     SCHEDULE_TYPES,
     WEEK_DAYS,
-    MIN_SECONDS_VALUE,
-    MAX_SECONDS_VALUE,
 )
 
 
@@ -16,7 +15,7 @@ class OpeningHourIn(BaseModel):
     value: int
 
     @validator("type")
-    def validate_type(cls, v):
+    def validate_type(cls, v: str) -> str:
         if v not in SCHEDULE_TYPES:
             allowed_types = ", ".join(SCHEDULE_TYPES)
             raise ValueError(f"{v} is not in {allowed_types}")
@@ -24,7 +23,7 @@ class OpeningHourIn(BaseModel):
         return v
 
     @validator("value")
-    def validate_value(cls, v):
+    def validate_value(cls, v: int) -> int:
         if not MIN_SECONDS_VALUE <= v <= MAX_SECONDS_VALUE:
             raise ValueError(
                 f"{v} is not between {MIN_SECONDS_VALUE} and {MAX_SECONDS_VALUE}"
@@ -36,7 +35,9 @@ class OpeningHoursIn(BaseModel):
     opening_hours: Dict[str, List[OpeningHourIn]]
 
     @validator("opening_hours")
-    def validate_week_names(cls, v):
+    def validate_week_names(
+        cls, v: Dict[str, List[OpeningHourIn]]
+    ) -> Dict[str, List[OpeningHourIn]]:
         for week_name, _ in v.items():
             if not week_name:
                 raise ValueError("Week name cannot be empty.")
@@ -45,3 +46,7 @@ class OpeningHoursIn(BaseModel):
                 raise ValueError(f"{v} is not in {allowed_week_days}.")
 
         return v
+
+
+class OpeningHoursOut(BaseModel):
+    day: str
