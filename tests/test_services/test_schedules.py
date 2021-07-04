@@ -1,12 +1,16 @@
 import pytest
 
 from models.domain.exceptions import InvalidOpeningHoursException
+from models.domain.schedules import OpeningHour
 from models.schemas.schedules import (
     OpeningHoursIn,
     OpeningHourIn,
     OpeningHoursOut,
 )
-from services.schedules import humanize_opening_hours
+from services.schedules import (
+    humanize_opening_hours,
+    format_opening_hours,
+)
 
 
 @pytest.mark.parametrize(
@@ -294,7 +298,7 @@ def test_humanize_opening_hours_days_invalid(opening_hours):
                     "sunday": [],
                 }
             ),
-            OpeningHoursOut(
+            OpeningHour(
                 opening_hours={
                     "monday": [],
                     "tuesday": [],
@@ -323,7 +327,7 @@ def test_humanize_opening_hours_days_invalid(opening_hours):
                     "sunday": [],
                 }
             ),
-            OpeningHoursOut(
+            OpeningHour(
                 opening_hours={
                     "monday": [
                         ("10:00:00 AM", "06:00:00 PM"),
@@ -365,7 +369,7 @@ def test_humanize_opening_hours_days_invalid(opening_hours):
                     ],
                 }
             ),
-            OpeningHoursOut(
+            OpeningHour(
                 opening_hours={
                     "monday": [],
                     "tuesday": [["10:00:00 AM", "06:00:00 PM"]],
@@ -405,7 +409,7 @@ def test_humanize_opening_hours_days_invalid(opening_hours):
                     ],
                 }
             ),
-            OpeningHoursOut(
+            OpeningHour(
                 opening_hours={
                     "monday": [],
                     "tuesday": [["10:00:00 AM", "06:00:00 PM"]],
@@ -439,7 +443,7 @@ def test_humanize_opening_hours_days_invalid(opening_hours):
                     ],
                 }
             ),
-            OpeningHoursOut(
+            OpeningHour(
                 opening_hours={
                     "monday": [],
                     "tuesday": [],
@@ -455,4 +459,65 @@ def test_humanize_opening_hours_days_invalid(opening_hours):
 )
 def test_humanize_opening_hours_days(opening_hours, expected):
     result = humanize_opening_hours(opening_hours)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    "opening_hours, expected",
+    [
+        (
+            OpeningHour(
+                opening_hours={
+                    "monday": [],
+                    "tuesday": [],
+                    "wednesday": [],
+                    "thursday": [["10:30:00 AM", "06:00:00 PM"]],
+                    "friday": [["10:00:00 AM", "01:00:00 AM"]],
+                    "saturday": [["10:00:00 AM", "01:00:00 AM"]],
+                    "sunday": [],
+                }
+            ),
+            OpeningHoursOut(
+                opening_hours={
+                    "monday": "Closed",
+                    "tuesday": "Closed",
+                    "wednesday": "Closed",
+                    "thursday": "10:30:00 AM - 06:00:00 PM",
+                    "friday": "10:00:00 AM - 01:00:00 AM",
+                    "saturday": "10:00:00 AM - 01:00:00 AM",
+                    "sunday": "Closed",
+                }
+            ),
+        ),
+        (
+            OpeningHour(
+                opening_hours={
+                    "tuesday": [],
+                    "monday": [],
+                    "wednesday": [],
+                    "thursday": [
+                        ["10:30:00 AM", "06:00:00 PM"],
+                        ["06:05:00 PM", "09:00:00 PM"],
+                    ],
+                    "friday": [["10:00:00 AM", "01:00:00 AM"]],
+                    "saturday": [["10:00:00 AM", "01:00:00 AM"]],
+                    "sunday": [],
+                }
+            ),
+            OpeningHoursOut(
+                opening_hours={
+                    "monday": "Closed",
+                    "tuesday": "Closed",
+                    "wednesday": "Closed",
+                    "thursday": "10:30:00 AM - 06:00:00 PM, 06:05:00 PM - 09:00:00 PM",
+                    "friday": "10:00:00 AM - 01:00:00 AM",
+                    "saturday": "10:00:00 AM - 01:00:00 AM",
+                    "sunday": "Closed",
+                }
+            ),
+        ),
+    ],
+)
+def test_format_opening_hours(opening_hours, expected):
+    result = format_opening_hours(opening_hours)
     assert result == expected
