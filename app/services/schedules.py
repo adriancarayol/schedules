@@ -1,12 +1,49 @@
+from collections import OrderedDict
 from typing import List, Tuple
 
 from core.time import humanize_seconds
 from models.domain.exceptions import InvalidOpeningHoursException
-from models.domain.schedules import CLOSE, OPEN, WEEK_DAYS, WEEK_DAYS_TRANSITIONS
+from models.domain.schedules import (
+    CLOSE,
+    OPEN,
+    WEEK_DAYS,
+    WEEK_DAYS_TRANSITIONS,
+    OpeningHour,
+)
 from models.schemas.schedules import OpeningHourIn, OpeningHoursIn, OpeningHoursOut
 
 
-def humanize_opening_hours(opening_hours: OpeningHoursIn) -> OpeningHoursOut:
+def format_opening_hours(opening_hours: OpeningHour) -> OpeningHoursOut:
+    """
+    Format opening_hours humanized to string format.
+    :params opening_hours: Opening hours humanized.
+    :returns: Opening hours in string format.
+    """
+
+    opening_hours_formatted = OpeningHoursOut(opening_hours={})
+
+    for week_day, schedules in opening_hours.opening_hours.items():
+        if not schedules:
+            opening_hours_formatted.opening_hours[week_day] = "Closed"
+            continue
+
+        str_schedules = []
+        for schedule in schedules:
+            str_schedules.append(" - ".join(schedule))
+
+        opening_hours_formatted.opening_hours[week_day] = ", ".join(str_schedules)
+
+    ordered_dict = OrderedDict(
+        sorted(
+            opening_hours_formatted.opening_hours.items(),
+            key=lambda s: WEEK_DAYS.index(s[0]),
+        )
+    )
+
+    return OpeningHoursOut(opening_hours=ordered_dict)
+
+
+def humanize_opening_hours(opening_hours: OpeningHoursIn) -> OpeningHour:
     """
     Given a dictionary of opening hours,
     it returns a dictionary of opening hours humanized.
@@ -42,7 +79,7 @@ def humanize_opening_hours(opening_hours: OpeningHoursIn) -> OpeningHoursOut:
     if not _validate_opening_hours_for_all_days(week_days):
         raise InvalidOpeningHoursException("Please, provide opening hours for all days")
 
-    humanized_scheduled = OpeningHoursOut(opening_hours={k: [] for k in week_days})
+    humanized_scheduled = OpeningHour(opening_hours={k: [] for k in week_days})
 
     # Just sort the opening hours by value desc, so we can detect easily
     # the correct order of the schedules (open -> close -> open -> close, ...).

@@ -1,3 +1,7 @@
+from typing import Dict, List, Tuple
+
+from pydantic import BaseModel
+
 MONDAY = "monday"
 TUESDAY = "tuesday"
 WEDNESDAY = "wednesday"
@@ -7,16 +11,14 @@ SATURDAY = "saturday"
 SUNDAY = "sunday"
 
 # Collection of available week days.
-WEEK_DAYS = frozenset(
-    (
-        MONDAY,
-        TUESDAY,
-        WEDNESDAY,
-        THURSDAY,
-        FRIDAY,
-        SATURDAY,
-        SUNDAY,
-    )
+WEEK_DAYS = (
+    MONDAY,
+    TUESDAY,
+    WEDNESDAY,
+    THURSDAY,
+    FRIDAY,
+    SATURDAY,
+    SUNDAY,
 )
 
 # Opening/closing time
@@ -44,3 +46,7 @@ WEEK_DAYS_TRANSITIONS = {
     SATURDAY: SUNDAY,
     SUNDAY: MONDAY,
 }
+
+
+class OpeningHour(BaseModel):
+    opening_hours: Dict[str, List[Tuple[str, str]]]
