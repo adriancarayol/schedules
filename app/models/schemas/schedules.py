@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from pydantic import BaseModel, validator
 
@@ -49,4 +49,4 @@ class OpeningHoursIn(BaseModel):
 
 
 class OpeningHoursOut(BaseModel):
-    day: str
+    opening_hours: Dict[str, List[Tuple[str, str]]]

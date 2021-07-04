@@ -101,15 +101,16 @@ def test_opening_hours_in_model_invalid_data(input):
         OpeningHoursIn(opening_hours=input)
 
 
-
-@pytest.mark.parametrize("type_input, value_input", [
-    ("open", -1),
-    ("open", 900000),
-    ("close", -1),
-    ("close", 90000),
-    ("xxx", -1),
-    ("xxx", 1),
-]
+@pytest.mark.parametrize(
+    "type_input, value_input",
+    [
+        ("open", -1),
+        ("open", 900000),
+        ("close", -1),
+        ("close", 90000),
+        ("xxx", -1),
+        ("xxx", 1),
+    ],
 )
 def test_opening_hour_in_model_invalid_data(type_input, value_input):
     with pytest.raises(ValidationError):
